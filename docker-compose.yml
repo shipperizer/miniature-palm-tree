@@ -1,0 +1,38 @@
+version: '2'
+
+services:
+  server:
+    image: shipperizer/miniature-palm-tree:latest
+    build: .
+    command: make server
+    restart: always
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./server/cert.pem:/tmp/server/cert.pem
+      - ./server/key.pem:/tmp/server/key.pem
+    ports:
+      - 10443:443
+    depends_on:
+      - server
+    links:
+      - server:server
+
+  client:
+    image: shipperizer/miniature-palm-tree:latest
+    build: .
+    command: make client
+    environment:
+      - SERVER_HOST=nginx
+    depends_on:
+      - server
+    links:
+      - nginx:nginx
+    restart: always
+    volumes:
+      - ./client/cert.pem:/tmp/client/cert.pem
+      - ./client/key.pem:/tmp/client/key.pem
+      - ./testca/cacert.pem:/tmp/ca/cacert.pem      

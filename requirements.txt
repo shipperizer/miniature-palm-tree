@@ -1,0 +1,4 @@
+gunicorn==19.7
+gevent==1.2
+flask==0.12
+requests<=3.0
